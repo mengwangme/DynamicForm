@@ -1,0 +1,44 @@
+{% extends 'custom_form/master.html' %}
+{% load staticfiles %}
+
+
+{% block main %}
+    <div class="box">
+        <div class="header"><a href="/">Listen2nite</a><span class="chevron"> > </span> 自定义表单 </div>
+        <div class="header"><a href="{% url 'custom_form:add_field' %}">进入创建表单页面</a></div>
+        <div class="inner">
+            <form method="post" action="#" novalidate>
+                {% csrf_token %}
+                <table cellpadding="5" cellspacing="0" border="0" width="100%">
+                    <tbody>
+                            <tr>
+                                <td width="120" align="right">姓名</td>
+                                <td width="auto" align="left">
+                                    {{ form.name }}
+                                </td>
+                            </tr>
+                        {% for field in fields %}
+                            <tr>
+                                <td width="120" align="right">{{ field.field_name }}</td>
+                                <td width="auto" align="left">
+                                    <input type="{{ field.field_type }}" name="{{ field.field }}" required id="id_{{ field.field }}">
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td width="120" align="right"></td>
+                            <td width="auto" align="left">
+                                <input type="submit" class="btn btn-sm btn-secondary" value="提交">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block JS %}
+
+{% endblock %}

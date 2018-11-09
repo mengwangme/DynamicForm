@@ -1,0 +1,89 @@
+{% extends 'custom_form/master.html' %}
+{% load staticfiles %}
+
+
+{% block main %}
+    <div class="box">
+        <div class="header"><a href="/">Listen2nite</a><span class="chevron"> > </span> 创建自定义表单 </div>
+        
+        <div class="inner">
+            <form method="post" action="{% url 'custom_form:add_field' %}" novalidate>
+                {% csrf_token %}
+                <table cellpadding="5" cellspacing="0" border="0" width="100%">
+                    <tbody>
+                        <tr>
+                            <td width="120" align="right">字段</td>
+                            <td width="auto" align="left">
+                                {{ form.field }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="120" align="right">字段名称</td>
+                            <td width="auto" align="left">
+                                {{ form.field_name }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="120" align="right">字段类型</td>
+                            <td width="auto" align="left">
+                                {{ form.field_type }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="120" align="right"></td>
+                            <td width="auto" align="left">
+                                <input type="submit" class="btn btn-sm btn-secondary" value="添加">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+     <div class="box">
+        <div class="inner">
+            <div class="header"><a href="{% url 'custom_form:form' %}">查看生成表单</a></div>
+                {% csrf_token %}
+                <table cellpadding="5" cellspacing="0" border="0" width="100%">
+                    <tbody>
+                        <tr>
+                            <td width="120" >字段</td>
+                            <td width="120" >字段名</td>
+                            <td width="120" >字段类型</td>
+                        </tr>
+                        {% for field in fields %}
+                        <tr>
+                            <td width="120">
+                                {{ field.field }}
+                            </td>
+                            <td width="120">
+                                {{ field.field_name }}
+                            </td>
+                            <td width="120">
+                                {{ field.field_type }}
+                            </td>
+                            <td width="120">
+                                <a href="{% url 'custom_form:delete_field' field.field %}">删除</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block rightbar %}
+
+{% endblock %}
+
+{% block JS %}
+    <script>
+        $("#checkCode").click(function () {
+            this.src += '?'
+        });
+    </script>
+{% endblock %}
