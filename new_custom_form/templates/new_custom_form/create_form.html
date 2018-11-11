@@ -7,6 +7,9 @@
         <div class="header"><a href="/">Listen2nite</a><span class="chevron"> > </span> 创建自定义表单 </div>
         
         <div class="inner">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
             <form method="post" action="{% url 'new_custom_form:add_field' %}" novalidate>
                 {% csrf_token %}
                 <table cellpadding="5" cellspacing="0" border="0" width="100%">
@@ -94,7 +97,7 @@
             <div class="inner">
                 {% for form in forms %}
 {#                    <a href="{% url 'new_custom_form:form' form_name=form.name %}">{{ form }}</a>#}
-                    <a href="{% url 'new_custom_form:form' form %}">{{ form }}</a>
+                    <div><a href="{% url 'new_custom_form:form' form %}">{{ form }}</a></div>
                 {% endfor %}
             </div>
         </div>

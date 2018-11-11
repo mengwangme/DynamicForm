@@ -4,7 +4,6 @@ from .models import FormModel, FieldModel
 
 
 class FormForm(forms.ModelForm):
-    # name = forms.CharField(max_length=100, required=True, cl)
     form_name = forms.HiddenInput()
 
     class Meta:

@@ -11,7 +11,13 @@
                 {% csrf_token %}
                 <table cellpadding="5" cellspacing="0" border="0" width="100%">
                     <tbody>
-                        {{ custom_form }}
+                        {% for field in custom_form %}
+                            <tr>
+                                <td width="120" align="right">{{ field.label }}</td>
+                                <td width="auto" align="left">{{ field }}</td>
+                        </tr>
+                        {% endfor %}
+{#                        {{ custom_form }}#}
                         <tr>
                             <td width="120" align="right"></td>
                             <td width="auto" align="left">

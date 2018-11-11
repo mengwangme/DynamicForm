@@ -1,10 +1,8 @@
-from django.shortcuts import render, redirect, render_to_response
-from django.views.generic import View
+from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView, CreateView
 from django.db import connection
-from django.forms.formsets import formset_factory, BaseFormSet
-from django.middleware import csrf
 from django import forms
+from django.contrib import messages
 
 from .models import FormModel, FieldModel
 from .forms import FormForm, CreateFieldForm
@@ -21,6 +19,9 @@ class AddFieldView(CreateView):
     template_name = 'new_custom_form/create_form.html'
 
     def get_context_data(self, **kwargs):
+        """
+        向模板传入创建的字段和表单
+        """
         objs = FieldModel.objects.all()
         kwargs['fields'] = objs
         forms = FormModel.objects.all()
@@ -29,15 +30,17 @@ class AddFieldView(CreateView):
         return super(AddFieldView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
-        print('验证成功')
         field = form.save(commit=False)
-        # print(form.cleaned_data)
         form_name = form.cleaned_data['form_name']
         form = FormModel.objects.filter(form_name=form_name).first()
+
+        # 如果表单不存在,则创建该表单
         if not form:
             form = FormModel.objects.create(form_name=form_name)
-        # 当flag=True,禁止编辑
+
+        # 当flag=True,代表此表已经添加过数据,禁止编辑
         if form.flag==1:
+            messages.error(self.request, '该表单已创建模型,无法编辑')
             return redirect('new_custom_form:add_field')
         else:
             field.form = form
@@ -57,10 +60,7 @@ def delete_field(request, id):
 
 
 class CustomFormView(FormView):
-
-    # model = FormModel
     template_name = 'new_custom_form/form.html'
-    # form_class = FormForm
 
     def set_form(self, form_name):
         """
@@ -70,40 +70,29 @@ class CustomFormView(FormView):
         """
         # 指定表单
         custom_form = self.get_form(form_class=FormForm)
-        # custom_form = forms.ModelForm()
         form = FormModel.objects.filter(form_name=form_name).first()
-        # 指定字段
-        fields = FieldModel.objects.filter(form=form)
+        # 指定字段, 这一步考虑了字段的顺序
+        fields = FieldModel.objects.filter(form=form).order_by('id')
         for field in fields:
-            custom_form.fields[field.field] = forms.CharField()
-        # self.form_class = custom_form
+            # 根据field_type来设立不同类型的字段
+            if field.field_type == 'int':
+                custom_form.fields[field.field] = forms.IntegerField(label=field.field_name)
+            # 在这里可以添加代码,以考虑更多的字段类型
+            else:
+                custom_form.fields[field.field] = forms.CharField(label=field.field_name)
+
         return custom_form
 
     def get(self, request, *args, **kwargs):
-        # data['form_name'] = kwargs['form_name']
-        # 指定表单
-        # custom_form = self.get_form(form_class=FormForm)
-        # form = FormModel.objects.filter(form_name=kwargs['form_name']).first()
-        # # 指定字段
-        # fields = FieldModel.objects.filter(form=form)
-        # for field in fields:
-        #     custom_form.fields[field.field] = forms.CharField()
-        # self.form_class = custom_form
-        # print(self.form_class)
         custom_form = self.set_form(kwargs['form_name'])
-        data = {}
         data = {'form_name': kwargs['form_name'],
                 'custom_form': custom_form}
 
-        # return render_to_response('new_custom_form/form.html', data)
         return render(request, 'new_custom_form/form.html', data)
 
     def post(self, request, *args, **kwargs):
         self.object = None
-        # form = kwargs['custom_form']
         form = self.set_form(kwargs['form_name'])
-        # form = self.get_form(form_class=form)
-        # print(self.form_class)
         print(form)
         if form.is_valid():
             print('验证成功')
@@ -112,18 +101,16 @@ class CustomFormView(FormView):
             print('验证失败')
             return self.form_invalid(form)
 
-
     def form_valid(self, form, form_name):
         form.save(commit=False)
         cursor = connection.cursor()
-
-        # form_name = form.cleaned_data['name']
         custom_form = FormModel.objects.filter(form_name=form_name).first()
 
         # 如果表不存在,先创建表
         if custom_form.flag==0:
             fields_list = []
             fields = FieldModel.objects.filter(form=custom_form)
+            # 创建 sql 语句
             for field in fields:
                 str = '{0} varchar(50) not null'.format(field.field)
                 fields_list.append(str)
@@ -132,7 +119,7 @@ class CustomFormView(FormView):
                          'id int(3) auto_increment not null primary key,' \
                          '{1}' \
                          ');'.format(form_name, field_str)
-            print(create_sql)
+            # print(create_sql)
             cursor.execute(create_sql)
             # 将模型改为不可编辑
             FormModel.objects.filter(form_name=form_name).update(flag=1)
@@ -153,7 +140,7 @@ class CustomFormView(FormView):
         return redirect('/form/{}'.format(form_name))
 
     def form_invalid(self, form):
-
+        messages.error(self.request, '输入表单无效')
         return redirect('new_custom_form:add_field')
 
 
