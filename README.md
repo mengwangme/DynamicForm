@@ -2,50 +2,54 @@
 
 ## 思想
 
-创建两张表:
+### Model
 
-1. `FormModel`这张表是控制要动态生成表单的字段.
-2. `CustomModel`这张表是表单数据的存储表.
+#### FormModel
 
-核心逻辑:
+此模型存储所有的表单.
 
-创建字段:也就是在`FormModel`表中添加字段,添加此字段的同时会在`CustomModel`表中添加相应的属性.
+此模型一共两个属性`form_name`和`flag`.
 
-删除字段:也就是在`FormModel`表中删除字段,删除此字段的同时会在`CUstomModel`表中删除响应的属性.
+1. `form_name`: 是表名,代表不同的表单.  
+2. `flag`: 代表此表是否已经添加过数据,若添加过数据,则不可再进行编辑.
 
-创建动态表单时,将`FormModel`表中所有字段取出,随后将其传入模板,遍历所有字段,并生成相应的输入框,具体代码如下:
+#### FieldModel
 
-```
-{% for field in fields %}
-	<tr>
-		<td width="120" align="right">{{ field.field_name }}</td>
-		<td width="auto" align="left">
-		<input type="{{ field.field_type }}" name="{{ field.field }}" required id="id_{{ field.field }}">
-		</td>
-	</tr>
-{% endfor %}
-```
+此模型存储所有表单的字段信息.
 
-最后提交表单时,读取表单数据,存入数据库.
+此模型一共4个属性.
+
+1. `form`: 代表此字段属于哪一个表,是外键,连接`FormModel`.
+2. `field`: 此字段在`<input>`中的name.
+3. `field_name`: 将在表单中显示的名称.
+4. `field_type`: 字段的类型.
+
+### Form
+
+#### CreateFieldForm
+
+添加字段的表单.
+
+#### FormForm
+
+添加数据实例的表单.
+
+### 整体思路
+
+1. 在`add_field`页面中为不同表单添加字段.
+	- 若表单已添加过实例,返回错误信息
+2. 将添加的字段和创建的表单在`add_field`页面中显示出来.
+3. 在`add_field`页面可以删除不要的字段.
+	- 若表单已添加过实例,返回错误信息
+3. 在`form`页面中为表单添加实例数据.
+	- 若表单并没有添加过实例,先在数据库中创建此表,再添加数据
 
 ## 效果截图
-
-- 创建表格字段的页面
-
+- 创建字段界面
 ![](./img/1.png)
 
-- 创建后
-
+- 返回异常界面
 ![](./img/2.png)
 
-- 生成的表格
-
+- 填写实例数据界面
 ![](./img/3.png)
-
-- 插入数据
-
-![](./img/4.png)
-
-- 在数据库中生成数据
-
-![](./img/5.png)

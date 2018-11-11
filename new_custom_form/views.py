@@ -40,7 +40,7 @@ class AddFieldView(CreateView):
 
         # 当flag=True,代表此表已经添加过数据,禁止编辑
         if form.flag==1:
-            messages.error(self.request, '该表单已创建模型,无法编辑')
+            messages.error(self.request, '该表单已创建实例,无法编辑')
             return redirect('new_custom_form:add_field')
         else:
             field.form = form
@@ -51,10 +51,14 @@ class AddFieldView(CreateView):
 def delete_field(request, id):
     """
     删除字段
-    :param request:
-    :return:
     """
-    FieldModel.objects.filter(id=id).delete()
+    field = FieldModel.objects.filter(id=id).first()
+
+    # 判断表单是否已经创建实例
+    if field.form.flag==1:
+        messages.error(request, '该表单已创建实例,无法编辑')
+    else:
+        FieldModel.objects.filter(id=id).delete()
 
     return redirect('new_custom_form:add_field')
 
@@ -65,8 +69,6 @@ class CustomFormView(FormView):
     def set_form(self, form_name):
         """
         创建form
-        :param form_name:
-        :return:
         """
         # 指定表单
         custom_form = self.get_form(form_class=FormForm)
@@ -108,9 +110,10 @@ class CustomFormView(FormView):
 
         # 如果表不存在,先创建表
         if custom_form.flag==0:
-            fields_list = []
-            fields = FieldModel.objects.filter(form=custom_form)
+            # 按添加顺序读取字段
+            fields = FieldModel.objects.filter(form=custom_form).order_by('id')
             # 创建 sql 语句
+            fields_list = []
             for field in fields:
                 str = '{0} varchar(50) not null'.format(field.field)
                 fields_list.append(str)

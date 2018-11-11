@@ -96,18 +96,9 @@
             </div>
             <div class="inner">
                 {% for form in forms %}
-{#                    <a href="{% url 'new_custom_form:form' form_name=form.name %}">{{ form }}</a>#}
                     <div><a href="{% url 'new_custom_form:form' form %}">{{ form }}</a></div>
                 {% endfor %}
             </div>
         </div>
 
-{% endblock %}
-
-{% block JS %}
-    <script>
-        $("#checkCode").click(function () {
-            this.src += '?'
-        });
-    </script>
 {% endblock %}
