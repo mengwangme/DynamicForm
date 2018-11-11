@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.views.generic.edit import FormView, CreateView
 from django.db import connection
+from django.forms.formsets import formset_factory, BaseFormSet
 
 from .models import FormModel, CustomModel
 from .forms import CreateFieldsForm, CustomForm
 
 
-class AddFieldView(FormView):
+class AddFieldView(CreateView):
     """
     添加表单字段
     POST 方式传入字典数据
@@ -31,7 +32,7 @@ class AddFieldView(FormView):
         cursor = connection.cursor()
         cursor.execute('alter table custom_form_custommodel add COLUMN {} VARCHAR(20) DEFAULT NULL;'.format(field))
 
-        return redirect('custom_form:add_field')
+        return redirect('new_custom_form:add_field')
 
 
 def delete_field(request, field):
@@ -42,7 +43,7 @@ def delete_field(request, field):
     cursor = connection.cursor()
     cursor.execute('alter table custom_form_custommodel drop COLUMN {};'.format(field))
 
-    return redirect('custom_form:add_field')
+    return redirect('new_custom_form:add_field')
 
 
 class CustomFormView(CreateView):
@@ -82,4 +83,4 @@ class CustomFormView(CreateView):
         sql = 'INSERT INTO custom_form_custommodel ({0}) VALUES ({1});'.format(key_str, value_str)
         cursor.execute(sql)
 
-        return redirect('custom_form:form')
+        return redirect('new_custom_form:form')

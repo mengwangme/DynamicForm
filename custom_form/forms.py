@@ -18,7 +18,7 @@ class CustomForm(forms.ModelForm):
 
     class Meta:
         model = CustomModel
-        exclude = ['', ]
+        exclude = ['list', ]
 
 
 def get_fields():

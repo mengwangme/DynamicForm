@@ -6,7 +6,7 @@ from .views import (
         delete_field,
 )
 
-app_name = 'custom_form'
+app_name = 'new_custom_form'
 
 urlpatterns = [
     path('', AddFieldView.as_view(), name='add_field'),

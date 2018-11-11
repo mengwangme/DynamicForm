@@ -4,7 +4,6 @@ from django.db import models
 # 允许的字段类型
 FIELD_TYPE = ['text', 'select']
 
-DD = '1'
 
 class FormModel(models.Model):
     field = models.CharField(max_length=100, null=False, blank=False, unique=True)
@@ -19,6 +18,7 @@ class FormModel(models.Model):
 
 class CustomModel(models.Model):
     name = models.CharField(max_length=100, unique=True, null=False, blank=False)
+    list = models.ForeignKey(FormModel, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = '个人信息'
